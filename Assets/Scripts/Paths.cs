@@ -13,8 +13,9 @@ public class Paths : MonoBehaviour
     public float speed = 0f;
 
     public bool renderPath = false;
-    public int renderPathResolution = 1000;
-    public float renderPathHeight = 1.0f;
+    public int renderPathResolution = 0;
+    public float renderPathHeight = 0.0f;
+    public float renderPathWidth = 0.0f;
 
     private float timeElapsed = 0.0f;
     
@@ -31,7 +32,7 @@ public class Paths : MonoBehaviour
          
             lineRenderer.material = new Material(Shader.Find("Standard"));
             lineRenderer.positionCount = renderPathResolution;
-            lineRenderer.widthMultiplier = 0.1f;  // Adjust the width as necessary
+            lineRenderer.widthMultiplier = renderPathWidth; 
 
             switch (path) {
                 case MovementPath.Square:
@@ -58,8 +59,6 @@ public class Paths : MonoBehaviour
                     Debug.Log(pathPositions.ToArray());
                     
                     lineRenderer.SetPositions(pathPositions.ToArray());
-
-                    
 
                     break;
 
