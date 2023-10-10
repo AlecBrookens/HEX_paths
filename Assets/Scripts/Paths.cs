@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,7 +29,7 @@ public class Paths : MonoBehaviour
     public float renderPathWidth = 0.0f;
     
     //path trace height
-    public float renderPathHeight;
+    public float renderPathHeight = 0.0f;
 
     public GameObject vrCamera;
     private float timeElapsed = 0.0f;
@@ -41,7 +42,8 @@ public class Paths : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         Vector3 newPosition = new Vector3(2, SphereHeight, 2);
         transform.position = newPosition;
-        CreatePath();
+        AddPath(true);
+        PositionUpdate();//its a feature not a bug i promise
     }
 
     // Update is called once per frame
@@ -51,7 +53,6 @@ public class Paths : MonoBehaviour
         {
             SphereHeight = vrCamera.transform.position.y + heightOffset;
         }
-        
         PositionUpdate();
         
     }
@@ -95,78 +96,96 @@ public class Paths : MonoBehaviour
                 newPosition.z = radius * Mathf.Sin(timeElapsed) * Mathf.Cos(timeElapsed);
                 break;
             case MovementPath.Off:
+                newPosition.x = 0;
+                newPosition.z = 0;
+                newPosition.y = vrCamera.transform.position.y + heightOffset;
                 break;
         }
         transform.position = newPosition;
     }//changes the sphere's position
-    public void CreatePath()
+    public void AddPath(Boolean create)
     {
-        if (renderPath)
+        if (create)
         {
-            lineRenderer = gameObject.AddComponent<LineRenderer>();
-
-            lineRenderer.material = new Material(Shader.Find("Standard"));
-            lineRenderer.positionCount = renderPathResolution + 2;
-            lineRenderer.widthMultiplier = renderPathWidth;
-
-            float curTheta = 0.0f;
-            float stepSize = 2 * Mathf.PI / renderPathResolution;
-            List<Vector3> pathPositions = new List<Vector3>();
-
-            switch (path)
+            if (renderPath)
             {
-                case MovementPath.Circle:
 
-                    while (curTheta <= 2 * Mathf.PI + 2 * stepSize)
-                    {
-                        Vector3 newPosition = new Vector3(0.0f, 0.0f, 0.0f);
-                        newPosition.x = radius * Mathf.Cos(curTheta);
-                        newPosition.y = renderPathHeight;
-                        newPosition.z = radius * Mathf.Sin(curTheta);
+                lineRenderer = gameObject.AddComponent<LineRenderer>();
 
-                        pathPositions.Add(newPosition);
+                lineRenderer.material = new Material(Shader.Find("Standard"));
+                lineRenderer.positionCount = renderPathResolution + 2;
+                lineRenderer.widthMultiplier = renderPathWidth;
 
-                        curTheta += stepSize;
-                    }
+                float curTheta = 0.0f;
+                float stepSize = 2 * Mathf.PI / renderPathResolution;
+                List<Vector3> pathPositions = new List<Vector3>();
 
-                    lineRenderer.SetPositions(pathPositions.ToArray());
+                switch (path)
+                {
+                    case MovementPath.Circle:
 
-                    break;
+                        while (curTheta <= 2 * Mathf.PI + 2 * stepSize)
+                        {
+                            Vector3 newPosition = new Vector3(0.0f, 0.0f, 0.0f);
+                            newPosition.x = radius * Mathf.Cos(curTheta);
+                            newPosition.y = renderPathHeight;
+                            newPosition.z = radius * Mathf.Sin(curTheta);
 
-                case MovementPath.Square:
-                    lineRenderer.positionCount = 5;
-                    Vector3[] corners = new Vector3[] {
-                    new Vector3(-radius / 2 , renderPathHeight, -radius / 2),
-                    new Vector3(radius / 2, renderPathHeight, -radius / 2),
-                    new Vector3(radius / 2, renderPathHeight, radius / 2),
-                    new Vector3(-radius / 2, renderPathHeight, radius / 2),
-                    new Vector3(-radius / 2, renderPathHeight, -radius / 2 - renderPathWidth / 2)
-                };
-                    lineRenderer.SetPositions(corners);
-                    break;
+                            pathPositions.Add(newPosition);
 
-                case MovementPath.FigureEight:
+                            curTheta += stepSize;
+                        }
 
-                    while (curTheta <= 2 * Mathf.PI + 2 * stepSize)
-                    {
-                        Vector3 newPosition = new Vector3(0.0f, 0.0f, 0.0f);
-                        newPosition.x = radius * Mathf.Sin(curTheta);
-                        newPosition.y = renderPathHeight;
-                        newPosition.z = radius * Mathf.Sin(curTheta) * Mathf.Cos(curTheta);
+                        lineRenderer.SetPositions(pathPositions.ToArray());
 
-                        pathPositions.Add(newPosition);
+                        break;
 
-                        curTheta += stepSize;
-                    }
+                    case MovementPath.Square:
+                        lineRenderer.positionCount = 5;
+                        Vector3[] corners = new Vector3[] {
+                                new Vector3(-radius / 2 , renderPathHeight, -radius / 2),
+                                new Vector3(radius / 2, renderPathHeight, -radius / 2),
+                                new Vector3(radius / 2, renderPathHeight, radius / 2),
+                                new Vector3(-radius / 2, renderPathHeight, radius / 2),
+                                new Vector3(-radius / 2, renderPathHeight, -radius / 2 )
+                            };
+                        lineRenderer.SetPositions(corners);
+                        break;
 
-                    lineRenderer.SetPositions(pathPositions.ToArray());
+                    case MovementPath.FigureEight:
 
-                    break;
+                        while (curTheta <= 2 * Mathf.PI + 2 * stepSize)
+                        {
+                            Vector3 newPosition = new Vector3(0.0f, 0.0f, 0.0f);
+                            newPosition.x = radius * Mathf.Sin(curTheta);
+                            newPosition.y = renderPathHeight;
+                            newPosition.z = radius * Mathf.Sin(curTheta) * Mathf.Cos(curTheta);
+
+                            pathPositions.Add(newPosition);
+
+                            curTheta += stepSize;
+                        }
+
+                        lineRenderer.SetPositions(pathPositions.ToArray());
+
+                        break;
+                }
             }
         }
-    }//renders the path trace
-    public void DestroyPath()
+        else
+        {
+            lineRenderer.enabled = true;
+        }
+    }//renders the path trace (true = create, false = reveal)
+    public void RemovePath(Boolean destroy)
     {
-
-    }//destroys the path trace
+        if (destroy)
+        {
+            Destroy(lineRenderer);
+        }
+        else
+        {
+            lineRenderer.enabled = false;
+        }
+    }//destroys the path trace (true = destroy, false = hide)
 }
