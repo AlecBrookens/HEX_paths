@@ -11,6 +11,7 @@ public class Paths : MonoBehaviour
 
     public float radius = 5.0f; //for the circle and figure-eight
     public float speed = 0f;
+    public float constantHeight = 0.0f;
 
     public bool renderPath = false;
     public int renderPathResolution = 0;
@@ -94,7 +95,7 @@ public class Paths : MonoBehaviour
     {
         timeElapsed += Time.deltaTime * speed;
 
-        Vector3 newPosition = new Vector3(0.0f, 2.0f, 0.0f);
+        Vector3 newPosition = new Vector3(0.0f, constantHeight, 0.0f);
 
         switch (path)
         {
