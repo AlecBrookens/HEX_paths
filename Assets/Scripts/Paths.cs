@@ -31,6 +31,13 @@ public class Paths : MonoBehaviour
     //path trace height
     public float renderPathHeight = 0.0f;
 
+    //distances for color spectrum
+    public float adequateDistance = 5f; // The distance at which the color is green
+    public float tooCloseDistance = 2f; // The distance at which the color is red
+    public float tooFarDistance = 10f; // The distance at which the color is blue
+
+    public Material colorChangingMaterial;
+    public Transform headsetTransform; 
     public GameObject vrCamera;
     private float timeElapsed = 0.0f;
     private float SphereHeight = 0.0f;
@@ -49,6 +56,7 @@ public class Paths : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        ColorChange();
         if (Input.GetKeyDown(KeyCode.H))
         {
             SphereHeight = vrCamera.transform.position.y + heightOffset;
@@ -188,4 +196,29 @@ public class Paths : MonoBehaviour
             lineRenderer.enabled = false;
         }
     }//destroys the path trace (true = destroy, false = hide)
+    public void ColorChange()
+    {
+        float distance = Vector3.Distance(transform.position, headsetTransform.position);
+        float normalizedDistance = Mathf.Clamp01(distance / maxDistance);
+        Color objectColor;
+        if (distance > tooFarDistance)
+        {
+            objectColor = Color.blue;
+        }
+        else if (distance <= tooFarDistance && distance > adequateDistance)
+        {
+            float t = (distance - adequateDistance) / (tooFarDistance - adequateDistance);
+            objectColor = Color.Lerp(Color.blue, Color.green, t);
+        }
+        else if (distance <= adequateDistance && distance > tooCloseDistance)
+        {
+            float t = (distance - tooCloseDistance) / (adequateDistance - tooCloseDistance);
+            objectColor = Color.Lerp(Color.green, Color.red, t);
+        }
+        else
+        {
+            objectColor = Color.red;
+        }
+        colorChangingMaterial.color = objectColor;
+    }
 }
