@@ -36,6 +36,8 @@ public class Paths : MonoBehaviour
     public float tooCloseDistance = 2f; // The distance at which the color is red
     public float tooFarDistance = 10f; // The distance at which the color is blue
 
+    private float maxDistance = 0f;
+
     public Material colorChangingMaterial;
     public Transform headsetTransform; 
     public GameObject vrCamera;
@@ -60,7 +62,7 @@ public class Paths : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.H))
         {
             SphereHeight = vrCamera.transform.position.y + heightOffset;
-        }
+        }   
         PositionUpdate();
         
     }
